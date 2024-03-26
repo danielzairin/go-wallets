@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/danielzairin/go-wallets/wallets"
 	_ "modernc.org/sqlite"
@@ -52,6 +53,48 @@ func main() {
 
 		w.WriteHeader(http.StatusCreated)
 		fmt.Fprintln(w, wallet.Name)
+	})
+
+	http.HandleFunc("POST /top-up/{walletName}", func(w http.ResponseWriter, r *http.Request) {
+		walletName := r.PathValue("walletName")
+
+		wallet, err := wal.FindByName(walletName)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "failed to find the wallet '%s'\n", walletName)
+			return
+		}
+
+		wal.TopUp(&wallet, 10)
+	})
+
+	http.HandleFunc("POST /transfer", func(w http.ResponseWriter, r *http.Request) {
+		from := r.FormValue("from")
+		to := r.FormValue("to")
+		amount := r.FormValue("amount")
+
+		amountNum, err := strconv.Atoi(amount)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintln(w, "failed to parse 'amount' as integer")
+			return
+		}
+
+		wal1, err := wal.FindByName(from)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "wallet with name '%v' not found\n", from)
+			return
+		}
+
+		wal2, err := wal.FindByName(to)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "wallet with name '%v' not found\n", to)
+			return
+		}
+
+		wal.Transfer(&wal1, &wal2, amountNum)
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
