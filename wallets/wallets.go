@@ -79,3 +79,27 @@ func (w *Wallets) FindByName(name string) (Wallet, error) {
 
 	return wallet, nil
 }
+
+func (w *Wallets) Transfer(from *Wallet, to *Wallet, amount int) error {
+	if amount <= 0 {
+		return fmt.Errorf("amount to transfer must be a positive number")
+	}
+
+	if from.Amount < amount {
+		return fmt.Errorf("wallet %s does not have enough funds to transfer", from.Name)
+	}
+
+	from.Amount -= amount
+	_, err := w.db.Exec("UPDATE wallets SET amount = amount - ? WHERE name = ?", amount, from.Name)
+	if err != nil {
+		return err
+	}
+
+	to.Amount += amount
+	_, err = w.db.Exec("UPDATE wallets SET amount = amount + ? WHERE name = ?", amount, to.Name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
