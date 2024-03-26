@@ -44,13 +44,13 @@ func TestTopUp(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, err = w.TopUp(wallet, 10)
+	_, err = w.TopUp(wallet, 30)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if wallet.Amount != 10 {
-		t.Errorf("expected = %d, got = %d", 10, wallet.Amount)
+	if wallet.Amount != 30 {
+		t.Errorf("expected = %d, got = %d", 30, wallet.Amount)
 	}
 }
 
