@@ -14,8 +14,6 @@ import (
 var DB_NAME string = "database.sqlite"
 
 func main() {
-	setup()
-
 	db, err := sql.Open("sqlite", DB_NAME)
 	if err != nil {
 		panic(err)
@@ -98,22 +96,4 @@ func main() {
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func setup() {
-	db, err := sql.Open("sqlite", DB_NAME)
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	_, err = db.Exec(`DROP TABLE IF EXISTS wallets`)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = db.Exec(`CREATE TABLE wallets (name TEXT PRIMARY KEY, amount INTEGER)`)
-	if err != nil {
-		panic(err)
-	}
 }
