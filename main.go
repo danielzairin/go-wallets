@@ -24,9 +24,7 @@ func main() {
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		wallets, err := wal.List()
 		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(w, http.StatusText(http.StatusInternalServerError))
+			internalError(w, err)
 			return
 		}
 
@@ -36,16 +34,13 @@ func main() {
 	http.HandleFunc("POST /", func(w http.ResponseWriter, r *http.Request) {
 		name := r.FormValue("name")
 		if name == "" {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintln(w, http.StatusText(http.StatusBadRequest))
+			reject(w, http.StatusBadRequest)
 			return
 		}
 
 		wallet, err := wal.Create(name)
 		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(w, http.StatusText(http.StatusInternalServerError))
+			internalError(w, err)
 			return
 		}
 
@@ -58,8 +53,7 @@ func main() {
 
 		wallet, err := wal.FindByName(walletName)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "failed to find the wallet '%s'\n", walletName)
+			reject(w, http.StatusNotFound)
 			return
 		}
 
@@ -73,22 +67,19 @@ func main() {
 
 		amountNum, err := strconv.Atoi(amount)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintln(w, "failed to parse 'amount' as integer")
+			reject(w, http.StatusBadRequest)
 			return
 		}
 
 		wal1, err := wal.FindByName(from)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "wallet with name '%v' not found\n", from)
+			reject(w, http.StatusNotFound)
 			return
 		}
 
 		wal2, err := wal.FindByName(to)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "wallet with name '%v' not found\n", to)
+			reject(w, http.StatusNotFound)
 			return
 		}
 
@@ -96,4 +87,14 @@ func main() {
 	})
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func reject(w http.ResponseWriter, code int) {
+	w.WriteHeader(code)
+	fmt.Fprintln(w, http.StatusText(code))
+}
+
+func internalError(w http.ResponseWriter, err error) {
+	fmt.Printf("Internal Server Error: %s\n", err)
+	reject(w, http.StatusInternalServerError)
 }
