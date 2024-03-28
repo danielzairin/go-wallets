@@ -10,6 +10,7 @@ import (
 )
 
 var db *sql.DB
+var w *wallets.Wallets
 
 func TestMain(m *testing.M) {
 	setup()
@@ -34,11 +35,11 @@ func setup() {
 	if err != nil {
 		panic(err)
 	}
+
+	w = wallets.NewWallet(db)
 }
 
 func TestTopUp(t *testing.T) {
-	w := wallets.NewWallet(db)
-
 	wallet, err := w.Create("test")
 	if err != nil {
 		t.Error(err)
@@ -55,8 +56,6 @@ func TestTopUp(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	w := wallets.NewWallet(db)
-
 	walletList, err := w.List()
 	if err != nil {
 		t.Error(err)
@@ -68,8 +67,6 @@ func TestList(t *testing.T) {
 }
 
 func TestFindByID(t *testing.T) {
-	w := wallets.NewWallet(db)
-
 	wallet, err := w.FindByName("test")
 	if err != nil {
 		t.Error(err)
@@ -81,8 +78,6 @@ func TestFindByID(t *testing.T) {
 }
 
 func TestTransfer(t *testing.T) {
-	w := wallets.NewWallet(db)
-
 	wallet1, err := w.FindByName("test")
 	if err != nil {
 		t.Error(err)
