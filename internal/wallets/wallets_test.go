@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/danielzairin/go-wallets/wallets"
+	"github.com/danielzairin/go-wallets/internal/wallets"
 	_ "modernc.org/sqlite"
 )
 

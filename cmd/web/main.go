@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/danielzairin/go-wallets/wallets"
+	"github.com/danielzairin/go-wallets/internal/wallets"
 	_ "modernc.org/sqlite"
 )
 
